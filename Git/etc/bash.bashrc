@@ -1,9 +1,9 @@
-# To the extent possible under law, the author(s) have dedicated all 
-# copyright and related and neighboring rights to this software to the 
-# public domain worldwide. This software is distributed without any warranty. 
-# You should have received a copy of the CC0 Public Domain Dedication along 
-# with this software. 
-# If not, see <http://creativecommons.org/publicdomain/zero/1.0/>. 
+# To the extent possible under law, the author(s) have dedicated all
+# copyright and related and neighboring rights to this software to the
+# public domain worldwide. This software is distributed without any warranty.
+# You should have received a copy of the CC0 Public Domain Dedication along
+# with this software.
+# If not, see <http://creativecommons.org/publicdomain/zero/1.0/>.
 
 # /etc/bash.bashrc: executed by bash(1) for interactive shells.
 
@@ -31,12 +31,13 @@ for _warning_prefix in '' ${MINGW_PREFIX}; do
                 _warning_found='true'
                 echo
             fi
-            if test -t 1
-                then printf "\t\e[1;33mwarning:\e[0m\n${_warning}\n\n"
-                else printf "\twarning:\n${_warning}\n\n"
+            if test -t 1; then
+                printf "\t\e[1;33mwarning:\e[0m\n${_warning}\n\n"
+            else
+                printf "\twarning:\n${_warning}\n\n"
             fi
         fi
-        [[ "${_warning_file}" = *.once ]] && rm -f "${_warning_file}"
+        [[ "${_warning_file}" == *.once ]] && rm -f "${_warning_file}"
     done
 done
 unset _warning_found
@@ -54,8 +55,8 @@ unset _warning
 #  then _ps1_symbol='\[\e[1m\]#\[\e[0m\]'
 #  else _ps1_symbol='\$'
 #fi
-[[ $(declare -p PS1 2>/dev/null | cut -c 1-11) = 'declare -x ' ]] || \
-  export PS1='\[\e]0;\w\a\]\n\[\e[32m\]\u@\h \[\e[35m\]$MSYSTEM\[\e[0m\] \[\e[33m\]\w\[\e[0m\]\n'"${_ps1_symbol}"' '
+[[ $(declare -p PS1 2>/dev/null | cut -c 1-11) == 'declare -x ' ]] || \
+export PS1='\[\e]0;\w\a\]\n\[\e[32m\]\u@\h \[\e[35m\]$MSYSTEM\[\e[0m\] \[\e[33m\]\w\[\e[0m\]\n'"${_ps1_symbol}"' '
 unset _ps1_symbol
 
 # Uncomment to use the terminal colours set in DIR_COLORS
@@ -65,4 +66,20 @@ unset _ps1_symbol
 shopt -q login_shell || . /etc/profile.d/git-prompt.sh
 
 alias ls='ls --color' # list with color
-eval "$(thefuck --alias)" # using thefuck
+alias cls='clear'     # cls to clear
+eval "$(thefuck --alias)"
+
+# Command that Bash executes just before displaying a prompt
+export PROMPT_COMMAND=set_prompt
+
+BEFORE_PS1="$PS1"
+
+set_prompt() {
+    # Capture exit code of last command
+    local exit_code=$?
+
+    PS1='\[\033]0;bash:$PWD\007\]' # set window title
+
+    [[ "$exit_code" -ne 0 ]] && PS1="\[\e[1;31m\]✘ $BEFORE_PS1"
+    [[ "$exit_code" -eq 0 ]] && PS1="$BEFORE_PS1"
+}
